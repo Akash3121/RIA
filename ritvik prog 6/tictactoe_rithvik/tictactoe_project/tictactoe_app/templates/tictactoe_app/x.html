@@ -1,0 +1,63 @@
+{% block extra_scripts %}
+    <script>
+        const player = 'X';
+        let waiting = false;
+
+        function updateBoard(grid) {
+            for (const cell in grid) {
+                $('#' + cell).text(grid[cell]);
+            }
+        }
+
+        function updateGameStatus(status) {
+            if (status === 'X' || status === 'O') {
+                $('#message').text(status + ' wins');
+            } else if (status === 'D') {
+                $('#message').text('draw');
+            }
+        }
+
+        function getGameState() {
+            $.ajax({
+                url: '/game/',
+                method: 'GET',
+                success: function (data) {
+                    updateBoard(data.grid);
+                    updateGameStatus(data.status);
+                    waiting = data.turn !== player;
+                }
+            });
+        }
+
+        function sendMove(move) {
+            $.ajax({
+                url: '/game/',
+                method: 'POST',
+                data: JSON.stringify({ move }),
+                contentType: 'application/json',
+                success: function (data) {
+                    updateBoard(data.grid);
+                    updateGameStatus(data.status);
+                    waiting = data.turn !== player;
+                }
+            });
+        }
+
+        $('#game-grid').on('click', 'td', function () {
+            if (!waiting && $(this).text() === '') {
+                const cellId = $(this).attr('id');
+                const move = [parseInt(cellId[1]), parseInt(cellId[2])];
+                sendMove(move);
+            }
+        });
+
+        $('#message').on('click', function () {
+            if (['X wins', 'O wins', 'draw'].includes($(this).text())) {
+                getGameState();
+                $('#message').text('');
+            }
+        });
+
+        getGameState();
+    </script>
+{% endblock %}

@@ -1,0 +1,81 @@
+body {
+  font-family: "Alkatra", cursive;
+  background-image: url("https://images.unsplash.com/photo-1592210454359-9043f067919b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+  background-size: cover;
+  overflow: hidden;
+}
+table,
+th,
+td {
+  border: 1px solid;
+  text-align: center;
+}
+table {
+  padding: 30px;
+  background-color: rgb(241, 226, 226);
+  color: rgb(60, 59, 59);
+  border-radius: 5px;
+  border: none;
+}
+h1 {
+  font-family: "Alkatra", cursive;
+}
+
+#formDiv {
+  background-color: rgb(241, 226, 226);
+  color: rgb(60, 59, 59);
+  width: fit-content;
+  display: block;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  margin-top: 200px;
+  border: none;
+  border-radius: 5px;
+}
+
+form {
+  font-size: larger;
+  padding: 20px;
+}
+#submit {
+  margin: 0 auto;
+  display: block;
+  width: fit-content;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: medium;
+  font-family: "Alkatra", cursive;
+  border: none;
+}
+#mainText {
+  color: white;
+  width: fit-content;
+  display: block;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  margin-top: 200px;
+  padding: 40px;
+  border-radius: 10px;
+}
+#mainText input {
+  padding: 10px;
+}
+#finalButton {
+  width: 50%;
+  margin: 0 auto;
+  border-radius: 5px;
+  font-family: "Alkatra", cursive;
+  cursor: pointer;
+  border: none;
+}
+#mainTableDiv {
+  margin: 0 auto;
+  width: fit-content;
+  display: block;
+  margin-top: 200px;
+}

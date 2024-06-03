@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Movies</title>
+</head>
+   <style>
+        
+        body {
+    font-family: "Arial", sans-serif;
+    background-color: #f9f9f9; 
+    color: #333; 
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #007bff; 
+    color: #fff; 
+}
+
+tr:hover {
+    background-color: #f2f2f2; 
+}
+
+#error-message {
+    color: #ff0000; 
+}
+
+.button {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #4caf50; 
+    color: #fff; 
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #45a049; 
+}
+    </style>
+<body>
+    <div>
+	<a href="{% url 'home' %}">Home</a>
+	<h1>Manage Movies</h1>
+
+        <form id="new-movie-form">
+		{% csrf_token %}
+            <label for="title">New Movie Title:</label>
+            <input type="text" id="title" name="title">
+            <button type="submit">Add Movie</button>
+        </form>
+<h2> <b> <div id="error-message" class="hidden"></div> </b></h2>
+<br>
+<br>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>In Stock</th>
+                    <th>Checked Out</th>
+                    <th>Add</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+		
+                {% for movie in movies %}
+                    <tr>
+                        <td>{{ movie.title }}</td>
+                        <td>{{ movie.in_stock }}</td>
+                        <td>{{ movie.checked_out }}</td>
+                        <td><button class="add-movie-btn" data-movie-id="{{ movie.id }}">+</button></td>
+                        <td><button class="remove-movie-btn" data-movie-id="{{ movie.id }}">-</button></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+<br>
+
+        
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script> <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const errorMessage = $('#error-message');
+
+            // Handle adding a new movie
+            $('#new-movie-form').submit(function(event) {
+                event.preventDefault();
+                const title = $('#title').val().trim();
+                if (!title) {
+                    errorMessage.text("Invalid movie title");
+                    errorMessage.removeClass('hidden');
+                    return;
+                }
+                $.ajax({
+                    url: '/dbMovie/',
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val(),
+                    },
+                    data: {
+                        action: 'new',
+                        title: title,
+                    },
+                    success: function(response) {
+                        if (response.error) {
+                            errorMessage.text(response.error);
+                            errorMessage.removeClass('hidden');
+                        } else {
+                            location.reload();
+                        }
+                    },
+                    error: function(response) {
+                        console.error(response);
+                        errorMessage.text("Movie Already Exists");
+                        errorMessage.removeClass('hidden');
+                    }
+                });
+            });
+
+            // Handle adding or removing a movie from stock
+            $('.add-movie-btn, .remove-movie-btn').click(function() {
+
+                const button = $(this);
+                const movieId = button.data('movie-id');
+                const action = button.hasClass('add-movie-btn') ? 'add' : 'remove';
+		
+                $.ajax({
+                    url: '/dbMovie/',
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val(),
+                    },
+                    data: {
+                        action: action,
+                        movie_id: movieId,
+                    },
+                    success: function(response) {
+                        if (response.error) {
+                            errorMessage.text(response.error);
+                            errorMessage.removeClass('hidden');
+				
+                        } else {
+                            const row = button.closest('tr');
+                            row.find('td:nth-child(2)').text(response.in_stock);
+                            row.find('td:nth-child(3)').text(response.checked_out);
+                            errorMessage.addClass('hidden');
+				location.reload();
+                        }
+                    },
+                    error: function(response) {
+                        console.error(response);
+                        errorMessage.text("No Copies Available");
+                        errorMessage.removeClass('hidden');
+                    } 
+                });
+            });
+        });
+    </script>
+</body>
+</html>

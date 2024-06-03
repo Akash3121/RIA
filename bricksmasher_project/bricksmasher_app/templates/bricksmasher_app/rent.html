@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rent Movies</title>
+</head>
+<style>
+        
+        body {
+    font-family: "Roboto", sans-serif; 
+    text-align: center;
+    background-color: #eaeaea; 
+    color: #444; 
+}
+
+h1 {
+    color: #ff6f61; 
+}
+
+a {
+    text-decoration: none;
+    color: #007bff; 
+}
+
+form {
+    margin-top: 30px; 
+}
+
+input[type="email"] {
+    width: 220px; 
+    padding: 10px; 
+    margin: 6px; 
+    box-sizing: border-box;
+}
+
+button[type="submit"] {
+    background-color: #17a2b8; 
+    color: #fff; 
+    padding: 10px 20px; 
+    border: none;
+    cursor: pointer;
+    border-radius: 6px; 
+}
+
+table {
+    width: 90%; 
+    margin: 30px auto; 
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 2px solid #007bff; 
+    border-radius: 8px; 
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #007bff; 
+    color: #fff; 
+}
+
+tr:hover {
+    background-color: #f2f2f2; 
+    cursor: pointer;
+}
+
+button[data-movie-id], button[data-movie-id]:hover {
+    background-color: #ff5722; 
+    color: #fff; 
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px; 
+    cursor: pointer;
+}
+
+#message {
+    color: #dc3545; 
+    margin-top: 12px; 
+}
+
+    </style>
+<body>
+    <a href="/">Home</a>
+    <h1>Rent Movies</h1>
+    <form method="POST">
+	{% csrf_token %}
+        <input type="email" name="email" placeholder="Enter member email">
+        <button type="submit">Submit</button>
+    </form>
+    {% if user %}
+    <p>Member: {{ user.first_name }} {{ user.last_name }}</p>
+    <table>
+        <tr>
+            <th>Checked Out Movies</th>
+            <th>Return</th>
+        </tr>
+        {% for checkout in checkouts %}
+        <tr>
+            <td>{{ checkout.movie.title }}</td>
+            <td><button data-movie-id="{{ checkout.movie_id }}" onclick="returnMovie(this)">Return</button></td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <table>
+        <tr>
+            <th>Available Movies</th>
+            <th>Rent</th>
+        </tr>
+        {% for movie in movies_in_stock %}
+        <tr>
+            <td>{{ movie.title }}</td>
+		{% csrf_token %}
+            <td><button data_movie_id="{{ movie_id }}" data_user_id="{{ user_id }}" onclick="rentMovie(this)">Rent</button></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+    <div id="message"></div>
+</body>
+<script>
+const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+function rentMovie(button) {
+    let movieId = button.dataset.movie_id;
+    let userId = button.dataset.user_id;
+    fetch('/dbRent/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+    		'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            user_id: user_id, 
+            movie_id: movie_id,
+            action: 'rent'
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        let message = '';
+        if (data.error) {
+            message = data.error;
+        } else {
+            location.reload();
+        }
+        document.querySelector('#message').textContent = message;
+    }); 
+}
+
+function returnMovie(button) {
+    let movieId = button.dataset.movie_id;
+    fetch('/dbRent/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+    		'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            movie_id: movieId,
+            action: 'return'
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        let message = '';
+        if (data.error) {
+            message = data.error;
+        } else {
+            location.reload();
+        }
+        document.querySelector('#message').textContent = message;
+    });
+}
+</script>
+</html>
